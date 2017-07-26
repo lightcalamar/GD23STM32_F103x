@@ -1,9 +1,11 @@
 # LICENCIA / LICENSE
 
-Team FT81X ( @TFTLCDCyg, @lightcalamar and @RndMnkIII )
+ FT81X Team ; @ <b>TFTLCDCyg</b>, @<b>lightcalamar</b> and @<b>RndMnkIII</b> 
 
 http://forum.arduino.cc/index.php?topic=419836.0
+
 http://forum.arduino.cc/index.php?topic=406170.0
+
 http://forum.arduino.cc/index.php?topic=445405.0
 
 Librería basada en GD2 Arduino DUE de James Bowman; http://excamera.com/files/Gameduino2_Due.zip  --ARM 32 bit---
