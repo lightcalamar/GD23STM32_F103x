@@ -1,8 +1,6 @@
 # LICENCIA / LICENSE
-/*
-========================================================
+
 Team FT81X ( @TFTLCDCyg, @lightcalamar and @RndMnkIII )
-========================================================
 
 http://forum.arduino.cc/index.php?topic=419836.0
 http://forum.arduino.cc/index.php?topic=406170.0
@@ -11,13 +9,10 @@ http://forum.arduino.cc/index.php?topic=445405.0
 Librería basada en GD2 Arduino DUE de James Bowman; http://excamera.com/files/Gameduino2_Due.zip  --ARM 32 bit---
 
 http://gameduino2.proboards.com/thread/367/new-team-ft81x
-*/
 
-/*
  * Copyright (C) 2013-2016 by James Bowman <jamesb@excamera.com>
  * Gameduino 2 library for Arduino, Arduino Due, Raspberry Pi.
- *
- */
+
 
 # GD23STM32_F103
 
