@@ -1,0 +1,26 @@
+Registro de modificaciones
+
+Librería base: carga de imagenes y audio mediante SdFat
+
+23 07 2017
+- GD23STM32.h
+  Inclusión de:
+
+--> ID Chip de pantalla FT81X
+
+    #define SCREEN_FT81X      13  //10, 11, 12, 13 
+
+--> ID Chip del MCU
+
+    #define STM32F407ZGt6      0  //0,1
+    #define STM32F103ZEt6      1  //0,1
+    #define STM32F103C8t6      0  //0,1
+
+--> RAM por tipo de MCU
+
+
+- GD23STM32.ccp
+
+--> Parámetros específicos para configurar FT810 (lightcalamar)
+--> Parámetros específicos para configurar FT813 (TFTLCDCyg)
+--> El mensaje de error reporta el MCU usado en base a la configuración de GD23STM32.h 
