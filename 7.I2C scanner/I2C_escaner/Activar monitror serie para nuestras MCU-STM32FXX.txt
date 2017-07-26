@@ -1,0 +1,36 @@
+1 -->IDE Archivo-->Preferencias
+
+2 En gestor de URLs Adicionales de Tarjetas copiar este link
+
+https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json
+
+3  Ok
+
+4 Herramientas--> En el menu de placas, buscar Gestor de tarjetas
+
+5 Tipo-->Contribución
+
+6 Instalar STM32 Cores
+
+7 Luego instalar STM32F1xx Cores
+
+          Dejar que termine el proceso de instalación.
+
+8  Seleccionar el MCU del CoreSTM Generic que estamos usando
+
+9  Establecer parámetros de subida
+
+10  Buscar el ejemplo:
+    STM32 board examples for users -->  all_boards -->  i2cScanner
+
+11   Ejecutar el sketch  i2cScanner
+
+    Se activará un puerto COM llamado BluePill F103C8
+
+    El número debe corrsponder al consecutivo del sistema operativo
+
+12 Seleccionar el puerto COM activado en el paso anterior. Ese será el puerto para activar el monitor Serie para el MCU en uso
+
+
+
+Nota: si el puerto COM BluePill F103C8 no aparece mas, repetir los pasos del 10 al 12
