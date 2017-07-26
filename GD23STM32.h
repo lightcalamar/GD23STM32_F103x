@@ -12,16 +12,43 @@
 #endif
 
 #include "Arduino.h"
+#include "SdFat.h"
 #include <stdarg.h>
 
-#define CS               PC5 //10 Riverdi-shield   8  gameduino2
-#define SD_PIN           PC4 // 5 Riverdi-shield   9  gameduino2
 
-#define TFT_FT81X_ENABLE  1   //            FT81x
-#define ORIENTACION       0   //0, 1, 2, 3, FT81X 
+#define POR_PIN          PB1  // POWER ON RESET SCREEN HOTMCU   Pin PB1 para (FOR) STM32F103C8T6   ONLY PWM pin is corect !!!   
+                              // by lightcalamar
 
-#define PROTO             0   //0 FT80x alternatives, 1 gameduino2
-#define ROTACION          1   //0,  1       FT80x
+//************By TFTLCDCyg
+
+#define TFT_CS           PA4  // PC5 //10 Riverdi-shield   8  gameduino2
+#define SD_PIN          PC13  // PC5//PA4 // 5 Riverdi-shield   9  gameduino2
+
+#define TFT_FT81X_ENABLE   1  //             FT81x
+#define SCREEN_FT81X      13  //10, 11, 12, 13 
+
+#define ORIENTACION        0  // 0, 1, 2, 3, FT81X 
+#define PROTO              0  // 0 FT80x alternatives, 1 gameduino2
+#define ROTACION           1  // 0,1         FT80x
+
+#define STM32F407ZGt6      0  // 0,1
+#define STM32F103ZEt6      1  // 0,1
+#define STM32F103C8t6      0  // 0,1
+
+#if (STM32F407ZGt6 == 1)
+  #define ST_RAM    131072UL
+#endif
+
+#if (STM32F103ZEt6 == 1)
+  #define ST_RAM    65536UL
+#endif
+
+#if (STM32F103C8t6 == 1)
+  #define ST_RAM    20480UL
+#endif
+
+//************By TFTLCDCyg
+
 
 
 #define RGB(r, g, b)    ((uint32_t)((((r) & 0xffL) << 16) | (((g) & 0xffL) << 8) | ((b) & 0xffL)))
@@ -31,6 +58,15 @@
 #define GD_CALIBRATE    1
 #define GD_TRIM         2
 #define GD_STORAGE      4
+
+
+//RndMnkIII: *** IMPORTANTE: ESTO DEFINE LIMITE SUPERIOR DE MEMORIA SEGUN MODELO DE FT8XX ***
+//RndMnkIII: valor para 1Mb o 256Kb
+#if ( TFT_FT81X_ENABLE == 1)
+	#define FT_LIMITE_SUP_MEMORIA 0x100000UL 
+#else
+	#define FT_LIMITE_SUP_MEMORIA 0x40000UL
+#endif
 
 #ifdef __SAM3X8E__
 #define __DUE__ 1
@@ -44,16 +80,16 @@
 // Arduino Due: no
 //
 
-#if !defined(RASPBERRY_PI) && !defined(DUMPDEV)
+//#if !defined(RASPBERRY_PI) && !defined(DUMPDEV)
 #define SDCARD 1
-#else
-#define SDCARD 0
-#endif
+//#else
+//#define SDCARD 0
+//#endif
 
 #if defined(__DUE__)
-#define MOSI  11
-#define MISO  12
-#define SCK   13    // B.27
+#define MOSI  PA7 //11
+#define MISO  PA6 //12
+#define SCK   PA5 //13    // B.27
 
 class ASPI_t {
 public:
@@ -87,7 +123,8 @@ public:
   }
 };
 static class ASPI_t ASPI;
-#define SPI ASPI
+//RndMnkIII: usar spi
+//#define SPI ASPI
 
 #endif
 
@@ -431,6 +468,12 @@ public:
 ////////////////////////////////////////////////////////////////////////
 
 class GDClass {
+//RndMnkIII
+private:
+    static const uint16_t TAM_BUFFER_SD; //8192 si se aumenta de tamaño se mejora en eficiencia de lectura 
+    static const uint16_t TAM_BUFFER_FT;
+    static byte buf[];
+    static byte FTbuf[];
 public:
   int w, h;
 
@@ -601,8 +644,13 @@ public:
   void reset(void);
 
   void dumpscreen(void);
+  
+  //RndMnkIII: método loadSdFat para carga de assets desde lector SDIO tarjetas STM32
+  byte loadSdFat(File& archivo, void (*progress)(long, long) = NULL);
   byte load(const char *filename, void (*progress)(long, long) = NULL);
   void safeload(const char *filename);
+  //RndMnkIII: método safeloadSdFat para carga de assets desde lector SDIO tarjetas STM32
+  void safeloadSdFat(File& archivo);
   void alert(const char *message);
 
   sdcard SD;
@@ -1080,13 +1128,85 @@ class Poly {
     }
 };
 
-#if SDCARD
-class Streamer {
+class StreamerSdFat {
 public:
   void begin(const char *rawsamples,
              uint16_t freq = 44100,
              byte format = ADPCM_SAMPLES,
-             uint32_t _base = (0x40000UL - 8192), uint16_t size = 8192) {
+             //RndMnkIII
+             //uint32_t _base = (0x40000UL - 8192), uint16_t size = 8192) {
+             //Importante base:limite superior memoria de video (1mb ft81x, 256kb ft80x) - tamaño del buffer
+             uint32_t _base = (FT_LIMITE_SUP_MEMORIA - 8192), uint16_t size = 8192) {    
+    GD.__end();
+    //r.openfile(rawsamples);
+	//RndMnkIII
+	archivo.open(rawsamples, O_RDONLY);
+    //por compatibilidad con la audio shield ahora se utiliza la libreria SD no la SdFat
+    //archivo = SD.open(rawsamples, FILE_READ);
+    GD.resume();
+
+    base = _base;
+    mask = size - 1;
+    wp = 0;
+
+    for (byte i = 10; i; i--)
+      feed();
+
+    GD.sample(base, size, freq, format, 1);
+  }
+  int feed() {
+    uint16_t rp = GD.rd32(REG_PLAYBACK_READPTR) - base;
+    uint16_t freespace = mask & ((rp - 1) - wp);
+    if (freespace >= 512) {
+      // REPORT(base);
+      // REPORT(rp);
+      // REPORT(wp);
+      // REPORT(freespace);
+      // Serial.println();
+      
+      // uint16_t n = min(512, r.size - r.offset);
+      // n = (n + 3) & ~3;   // force 32-bit alignment
+      GD.__end();
+	  //RndMnkIII
+      //r.readsector(buf);
+      archivo.read(buf,512);
+	  GD.resume();
+      GD.cmd_memwrite(base + wp, 512);
+      GD.copyram(buf, 512);
+      wp = (wp + 512) & mask;
+    }
+	//RndMnkIII
+    //return r.offset < r.size;
+	return archivo.position() - archivo.size();
+  }
+  void progress(uint16_t &val, uint16_t &range) {
+    //RndMnkIII
+	uint32_t m = archivo.size();
+    uint32_t p = min(archivo.position(), m);
+    while (m > 0x10000) {
+      m >>= 1;
+      p >>= 1;
+    }
+    val = p;
+    range = m;
+  }
+private:
+  //Reader r;
+  File archivo;
+  byte buf[512];
+  uint32_t base;
+  uint16_t mask;
+  uint16_t wp;
+};
+
+#if SDCARD
+class Streamer {
+public:
+	//RndMnkIII reemplazado valor 0x40000UL por FT_LIMITE_SUP_MEMORIA
+  void begin(const char *rawsamples,
+             uint16_t freq = 44100,
+             byte format = ADPCM_SAMPLES,
+             uint32_t _base = (FT_LIMITE_SUP_MEMORIA - 8192), uint16_t size = 8192) {
     GD.__end();
     r.openfile(rawsamples);
     GD.resume();
@@ -1140,10 +1260,11 @@ private:
 #else
 class Streamer {
 public:
+	//RndMnkIII reemplazado valor 0x40000UL por FT_LIMITE_SUP_MEMORIA
   void begin(const char *rawsamples,
              uint16_t freq = 44100,
              byte format = ADPCM_SAMPLES,
-             uint32_t _base = (0x40000UL - 4096), uint16_t size = 4096) {}
+             uint32_t _base = (FT_LIMITE_SUP_MEMORIA - 4096), uint16_t size = 4096) {}
   int feed() {}
   void progress(uint16_t &val, uint16_t &range) {}
 };

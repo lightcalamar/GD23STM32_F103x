@@ -1,8 +1,12 @@
 #include <Arduino.h>
 #include "SPI.h"
-#if !defined(__SAM3X8E__)
-#include "EEPROM.h"
-#endif
+//#if !defined(__SAM3X8E__)
+//#include "EEPROM.h"
+//#endif
+
+#include <Wire.h>
+#include <AT24Cxx.h>
+
 #define VERBOSE                 0
 #include <GD23STM32.h>
 
@@ -16,16 +20,16 @@
 
 // EVITA_0 has no storage or calibration
 #if (BOARD == BOARD_EVITA_0)
-// #undef STORAGE
-// #define STORAGE 0
+ #undef STORAGE
+ #define STORAGE 1
 #undef CALIBRATION
-#define CALIBRATION 0
+#define CALIBRATION 1
 #endif
 
 // FTDI boards do not have storage
 #if (BOARD == BOARD_FTDI_80x)
 #undef STORAGE
-#define STORAGE 0
+#define STORAGE 1
 #endif
 
 
@@ -51,10 +55,11 @@
 
 byte ft8xx_model;
 
-#if defined(ARDUINO)
+//#if defined(ARDUINO)
 #include "transports/wiring.h"
-#endif
+//#endif
 
+SPISettings settingsSTM32(18000000, MSBFIRST, SPI_MODE0); 
 ////////////////////////////////////////////////////////////////////////
 
 void xy::set(int _x, int _y)
@@ -198,6 +203,9 @@ private:
     return r;
   }
 
+  
+
+
 public:
   void read(byte *v)
   {
@@ -231,6 +239,12 @@ public:
     GDTR.resume();
   }
 };
+
+//RndMnkIII
+const uint16_t GDClass::TAM_BUFFER_SD=8192;
+const uint16_t GDClass::TAM_BUFFER_FT=2048;
+byte GDClass::buf[TAM_BUFFER_SD];
+byte GDClass::FTbuf[TAM_BUFFER_FT];
 
 void GDClass::flush(void)
 {
@@ -266,6 +280,14 @@ uint32_t GDClass::measure_freq(void)
 #endif
 // #define LOW_FREQ_BOUND  32040000UL
 
+
+
+
+
+
+      
+
+
 void GDClass::tune(void)
 {
   uint32_t f;
@@ -276,14 +298,14 @@ void GDClass::tune(void)
 }
 
 void GDClass::begin(uint8_t options) {
-#if defined(ARDUINO)
+//#if defined(ARDUINO)
   GDTR.begin0();
 
-  if (STORAGE && (options & GD_STORAGE)) {
+  //if (STORAGE && (options & GD_STORAGE)) {
     GDTR.ios();
     SD.begin(SD_PIN);
-  }
-#endif
+ // }
+//#endif
 
   GDTR.begin1();
 
@@ -328,25 +350,55 @@ void GDClass::begin(uint8_t options) {
 
    if (TFT_FT81X_ENABLE == 1)
    {
-    Serial.println("FT813");
-    GD.wr32(REG_HCYCLE, 1056);    // 900 //548
-    GD.wr32(REG_HOFFSET, 46);     // 43
-    GD.wr32(REG_HSIZE, 800);
-    GD.wr32(REG_HSYNC0, 0);
-    GD.wr32(REG_HSYNC1, 10);      // 41
-    GD.wr32(REG_VCYCLE, 525);     // 500
-    GD.wr32(REG_VOFFSET, 23);     // 12
-    GD.wr32(REG_VSIZE, 480);
-    GD.wr32(REG_VSYNC0, 0);
-    GD.wr32(REG_VSYNC1, 10);
-    GD.wr32(REG_PCLK, 2);
-    GD.wr32(REG_PCLK_POL, 1);
-    GD.wr32(REG_DITHER, 0);        // 1
-    GD.wr32(REG_CSPREAD, 0);       // 1
-    //cmd_setrotate(ORIENTACION);
+
+// ******************************************************************************************
+//    REGISTOS CORRECTOS PARA FT813    20 JULIO DE 2017 Julio C. Gonz�lez (TFTLCDCyg)
+// ******************************************************************************************
+
+#if(SCREEN_FT81X == 13)
+   {
+GD.wr32(REG_HCYCLE, 1000);//548
+GD.wr32(REG_HOFFSET, 46);
+GD.wr32(REG_HSIZE, 800);
+GD.wr32(REG_HSYNC0, 0);
+GD.wr32(REG_HSYNC1, 41);
+GD.wr32(REG_VCYCLE, 525);
+GD.wr32(REG_VOFFSET, 23);
+GD.wr32(REG_VSIZE, 480);
+GD.wr32(REG_VSYNC0, 0);
+GD.wr32(REG_VSYNC1, 10);
+GD.wr32(REG_DITHER, 0);
+GD.wr32(REG_PCLK_POL, 1);//1
+GD.wr32(REG_PCLK, 2);//5
+//GD.wr(REG_ROTATE, 0);
+//GD.wr(REG_SWIZZLE, 0);//3 for GD2
    }
+#endif
 
+// ******************************************************************************************
+//    REGISTOS CORRECTOS PARA FT810    24 JUNIO DE 2017 Tomas F. LINARES (lightcalamar)
+// ******************************************************************************************
 
+#if(SCREEN_FT81X == 10)
+   {
+GD.wr32(REG_HCYCLE, 900);//548
+GD.wr32(REG_HOFFSET, 43);
+GD.wr32(REG_HSIZE, 800);
+GD.wr32(REG_HSYNC0, 0);
+GD.wr32(REG_HSYNC1, 41);
+GD.wr32(REG_VCYCLE, 500);
+GD.wr32(REG_VOFFSET, 12);
+GD.wr32(REG_VSIZE, 480);
+GD.wr32(REG_VSYNC0, 0);
+GD.wr32(REG_VSYNC1, 10);
+GD.wr32(REG_DITHER, 1);
+GD.wr32(REG_PCLK_POL, 1);//1
+GD.wr32(REG_PCLK, 3);//5
+GD.wr(REG_ROTATE, 0);
+GD.wr(REG_SWIZZLE, 0);//3 for GD2
+   }
+#endif
+   }
   }
 #endif
 
@@ -404,18 +456,42 @@ void GDClass::begin(uint8_t options) {
 
   if (CALIBRATION & (options & GD_CALIBRATE)) {
 
-#if defined(ARDUINO) && !defined(__DUE__)
-    if ((EEPROM.read(0) != 0x7c)) {
+//#if defined(ARDUINO) && !defined(__DUE__)
+    //if ((EEPROM.read(0) != 0x7c)) {
+    //  self_calibrate();
+      // for (int i = 0; i < 24; i++) //Serial.println(GDTR.rd(REG_TOUCH_TRANSFORM_A + i), HEX);
+    //  for (int i = 0; i < 24; i++)
+      //  EEPROM.write(1 + i, GDTR.rd(REG_TOUCH_TRANSFORM_A + i));
+   //   EEPROM.write(0, 0x7c);  // is written!
+   // } else {
+    //  for (int i = 0; i < 24; i++)
+    //    GDTR.wr(REG_TOUCH_TRANSFORM_A + i, EEPROM.read(1 + i));
+  //  }
+//#endif
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// PROBAR LA EEPROM EXTERIOR PARA LA CALIBRACION
+#define i2c_address 0x50
+AT24Cxx eep(i2c_address, 32);
+
+//#if defined(ARDUINO) && !defined(__DUE__)
+
+    if (eep.read(0) != 0x7c) {
       self_calibrate();
-      // for (int i = 0; i < 24; i++) Serial.println(GDTR.rd(REG_TOUCH_TRANSFORM_A + i), HEX);
-      for (int i = 0; i < 24; i++)
-        EEPROM.write(1 + i, GDTR.rd(REG_TOUCH_TRANSFORM_A + i));
-      EEPROM.write(0, 0x7c);  // is written!
+      for (int i = 0; i < 24; i++) //Serial.println(GDTR.rd(REG_TOUCH_TRANSFORM_A + i), HEX);
+//     for (int i = 0; i < 24; i++)  // SI SE REPITE ESTA LINEA TARDA MUCHO EN RESPONDER LA EEPROM    !!!!OJO !!!!!
+        eep.write(1 + i, GDTR.rd(REG_TOUCH_TRANSFORM_A + i));
+      eep.write(0, 0x7c);  // is written!
     } else {
       for (int i = 0; i < 24; i++)
-        GDTR.wr(REG_TOUCH_TRANSFORM_A + i, EEPROM.read(1 + i));
-    }
-#endif
+        GDTR.wr(REG_TOUCH_TRANSFORM_A + i, eep.read(1 + i));
+    }  
+
+//#endif
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 #ifdef __DUE__
     // The Due has no persistent storage. So instead use a "canned"
@@ -1388,6 +1464,59 @@ byte GDClass::load(const char *filename, void (*progress)(long, long))
 #endif
 }
 
+//RndMnkIII: método loadSdFat para carga de assets desde lector SD tarjetas STM32
+byte GDClass::loadSdFat(File& archivo, void (*progress)(long, long))
+{
+
+  int offset=0;
+  int offsetFT;
+  int bytesDisponibles;
+  int wbn;
+  SPI.beginTransaction(settingsSTM32);
+  
+  GD.__end();
+  
+  if (archivo) {
+    
+	int tamArchivo=archivo.available();
+    
+    while( offset < tamArchivo)
+    {
+        uint16_t m = ( (archivo.available() > TAM_BUFFER_SD) ? TAM_BUFFER_SD : archivo.available());
+        archivo.read(buf,m);
+        
+        offsetFT=0;
+        bytesDisponibles=m;
+        while (offsetFT < m) 
+        {
+              uint16_t n = ( (bytesDisponibles > TAM_BUFFER_FT) ? TAM_BUFFER_FT : bytesDisponibles);
+             
+              wbn = (n + 3) & ~3;   // force 32-bit alignment
+
+              GD.resume();
+              if (progress)
+                (*progress)((offset+offsetFT), tamArchivo);
+#ifdef DUMMY_GDCOPYRAM
+                memcpy (FTbuf, buf+offsetFT, wbn );
+#else
+                GD.copyram((buf+offsetFT), wbn);
+#endif              
+              offsetFT+=n;
+              bytesDisponibles-=n;
+              GDTR.stop();
+        }
+        offset+=m;         
+    }	
+            
+    GD.resume();
+    SPI.endTransaction();
+    return 1;
+  }
+  GD.resume();
+  SPI.endTransaction();
+  return 0;
+}
+
 // Generated by mk_bsod.py. Blue screen with 'ERROR' text
 static const PROGMEM uint8_t __bsod[32] = {
 0, 255, 255, 255, 96, 0, 0, 2, 7, 0, 0, 38, 12, 255, 255, 255, 240, 0,
@@ -1405,8 +1534,28 @@ static const PROGMEM uint8_t __bsod_badfile[32] = {
 void GDClass::alert(const char *message)
 {
   begin(0);
-  copy(__bsod, sizeof(__bsod));
-  cmd_text(240, 176, 29, OPT_CENTER, message);
+  //copy(__bsod, sizeof(__bsod));
+  //cmd_text(240, 176, 29, OPT_CENTER, message);
+ cmd_dlstart();
+ 
+if(TFT_FT81X_ENABLE==1){cmd_setrotate(ORIENTACION);}
+if(TFT_FT81X_ENABLE==0){GDTR.wr(REG_ROTATE, ROTACION);}
+
+ ClearColorRGB(0x650000);
+  Clear();
+
+if(STM32F407ZGt6==1){
+ cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F407ZGT6");}
+
+if(STM32F103ZEt6==1){
+ cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F103ZET6");}
+
+if(STM32F103C8t6==1){
+ cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F103C8T6");}
+
+
+ cmd_text(GD.w / 2, (GD.h / 2)+29, 29, OPT_CENTER, "Revisar comandos");
+
   swap();
   GD.finish();
   for (;;)
@@ -1419,6 +1568,19 @@ void GDClass::safeload(const char *filename)
     copy(__bsod, sizeof(__bsod));
     copy(__bsod_badfile, sizeof(__bsod_badfile));
     cmd_text(240, 190, 29, OPT_CENTER, filename);
+    swap();
+    for (;;)
+      ;
+  }
+}
+
+//RndMnkIII: método safeloadSdFat para carga de assets desde lector SDIO tarjetas STM32
+void GDClass::safeloadSdFat(File& archivo)
+{
+  if (!loadSdFat(archivo)) {
+    copy(__bsod, sizeof(__bsod));
+    copy(__bsod_badfile, sizeof(__bsod_badfile));
+    cmd_text(240, 190, 29, OPT_CENTER, archivo.name());
     swap();
     for (;;)
       ;
