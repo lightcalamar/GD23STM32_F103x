@@ -42,3 +42,7 @@ Librería base: carga de imagenes y audio mediante SdFat
 Ejemplo de uso:
 
     GD.ColorRGB(0x00ff00); sprintf(TXP,"F_SDIO:  %d MHz", (FreqSDIO/1000000));  GD.cmd_text(GD.w - 105, 25, 26, 0, TXP);
+
+- wiring.h
+
+--> Modificación en la rutina POR para pantallas FT813 de Riverdi, estas pantallas solo requieren que el pin PD esté en alto
