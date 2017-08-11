@@ -38,3 +38,7 @@ Librería base: carga de imagenes y audio mediante SdFat
 --> Uso de FreqSDIO directamente en la función que establece la frecuencia de trabajo del lector SDIO
 
     SPISettings settingsSTM32(FreqSDIO, MSBFIRST, SPI_MODE0); 
+
+Ejemplo de uso:
+
+    GD.ColorRGB(0x00ff00); sprintf(TXP,"F_SDIO:  %d MHz", (FreqSDIO/1000000));  GD.cmd_text(GD.w - 105, 25, 26, 0, TXP);
