@@ -1,10 +1,10 @@
 Registro de modificaciones
 
-Librer�a base: carga de imagenes y audio mediante SdFat
+Librería base: carga de imagenes y audio mediante SdFat
 
 23 07 2017
 - GD23STM32.h
-  Inclusi�n de:
+  Inclusión de:
 
 --> ID Chip de pantalla FT81X
 
@@ -21,6 +21,20 @@ Librer�a base: carga de imagenes y audio mediante SdFat
 
 - GD23STM32.ccp
 
---> Par�metros espec�ficos para configurar FT810 (lightcalamar)
---> Par�metros espec�ficos para configurar FT813 (TFTLCDCyg)
---> El mensaje de error reporta el MCU usado en base a la configuraci�n de GD23STM32.h 
+--> Parámetros específicos para configurar FT810 (lightcalamar)
+--> Parámetros específicos para configurar FT813 (TFTLCDCyg)
+--> El mensaje de error reporta el MCU usado en base a la configuración de GD23STM32.h 
+
+11 08 2017
+- GD23STM32.h
+  Inclusión de:
+
+--> FreqSDIO para establecer la frecuencia de acceso al lector SDIO de MCU F407X
+--> Adicionalmente, permite ver en pantalla la frecuencia establecida de acceso a SDIO
+
+    #define FreqSDIO      (21000000) // (21000000)=21 MHz    (42000000)=42 MHz
+
+- GD23STM32.ccp
+--> Uso de FreqSDIO directamente en la función que establece la frecuencia de trabajo del lector SDIO
+
+    SPISettings settingsSTM32(FreqSDIO, MSBFIRST, SPI_MODE0); 
