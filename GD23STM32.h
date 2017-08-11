@@ -45,6 +45,8 @@ http://gameduino2.proboards.com/thread/367/new-team-ft81x
 #define PROTO              0  // 0 FT80x alternatives, 1 gameduino2
 #define ROTACION           1  // 0,1         FT80x
 
+#define FreqSDIO         (21000000)  // (21000000)=21 MHz    (42000000)=42 MHz
+
 #define STM32F407ZGt6      0  // 0,1
 #define STM32F103ZEt6      1  // 0,1
 #define STM32F103C8t6      0  // 0,1
