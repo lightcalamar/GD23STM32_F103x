@@ -80,7 +80,9 @@ byte ft8xx_model;
 #include "transports/wiring.h"
 //#endif
 
-SPISettings settingsSTM32(18000000, MSBFIRST, SPI_MODE0); 
+//SPISettings settingsSTM32(42000000, MSBFIRST, SPI_MODE0); 
+
+SPISettings settingsSTM32(FreqSDIO, MSBFIRST, SPI_MODE0); 
 ////////////////////////////////////////////////////////////////////////
 
 void xy::set(int _x, int _y)
