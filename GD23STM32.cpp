@@ -1567,15 +1567,25 @@ if(TFT_FT81X_ENABLE==0){GDTR.wr(REG_ROTATE, ROTACION);}
  ClearColorRGB(0x650000);
   Clear();
 
-if(STM32F407ZGt6==1){
- cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F407ZGT6");}
+#ifdef __F407ZGT6__
+cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F407ZGT6");
+#endif
 
-if(STM32F103ZEt6==1){
- cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F103ZET6");}
+#ifdef __F407VET6__
+cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F407VET6");
+#endif
 
-if(STM32F103C8t6==1){
- cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F103C8T6");}
+#ifdef __F103ZET6__
+cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F103ZET6");
+#endif
 
+#ifdef __F103VET6__
+cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F103VET6");
+#endif
+
+#ifdef __F103C8T6__
+cmd_text(GD.w / 2, (GD.h / 2)-29, 31, OPT_CENTER, "Error en STM32F103C8T6");
+#endif
 
  cmd_text(GD.w / 2, (GD.h / 2)+29, 29, OPT_CENTER, "Revisar comandos");
 
@@ -1589,8 +1599,10 @@ void GDClass::safeload(const char *filename)
 {
   if (!load(filename)) {
     copy(__bsod, sizeof(__bsod));
-    copy(__bsod_badfile, sizeof(__bsod_badfile));
-    cmd_text(240, 190, 29, OPT_CENTER, filename);
+    //copy(__bsod_badfile, sizeof(__bsod_badfile));
+    //cmd_text(240, 190, 29, OPT_CENTER, filename);
+    cmd_text(50, GD.h/2, 29, 0, "- Check asset file name inside of the sketch");
+    cmd_text(50, GD.h/2+30, 29, 0, "- Copy *.gd2 in the SD card");
     swap();
     for (;;)
       ;
@@ -1602,8 +1614,10 @@ void GDClass::safeloadSdFat(File& archivo)
 {
   if (!loadSdFat(archivo)) {
     copy(__bsod, sizeof(__bsod));
-    copy(__bsod_badfile, sizeof(__bsod_badfile));
-    cmd_text(240, 190, 29, OPT_CENTER, archivo.name());
+    //copy(__bsod_badfile, sizeof(__bsod_badfile));
+    //cmd_text(240, 190, 29, OPT_CENTER, archivo.name());
+    cmd_text(50, GD.h/2, 29, 0, "- Check asset file name inside of the sketch");
+    cmd_text(50, GD.h/2+30, 29, 0, "- Copy *.gd2 in the SD card");
     swap();
     for (;;)
       ;
