@@ -495,7 +495,9 @@ GD.wr(REG_SWIZZLE, 0);//3 for GD2
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // PROBAR LA EEPROM EXTERIOR PARA LA CALIBRACION
-#define i2c_address 0x50
+#define i2c_address 0x50  //EEPROM Shield
+//#define i2c_address 0x57  //EEPROM DS3231
+	  
 AT24Cxx eep(i2c_address, 32);
 
 //#if defined(ARDUINO) && !defined(__DUE__)
