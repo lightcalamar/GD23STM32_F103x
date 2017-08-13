@@ -47,24 +47,9 @@ http://gameduino2.proboards.com/thread/367/new-team-ft81x
 
 #define FreqSDIO         (21000000)  // (21000000)=21 MHz    (42000000)=42 MHz
 
-#define STM32F407ZGt6      0  // 0,1
-#define STM32F103ZEt6      1  // 0,1
-#define STM32F103C8t6      0  // 0,1
-
-#if (STM32F407ZGt6 == 1)
-  #define ST_RAM    131072UL
-#endif
-
-#if (STM32F103ZEt6 == 1)
-  #define ST_RAM    65536UL
-#endif
-
-#if (STM32F103C8t6 == 1)
-  #define ST_RAM    20480UL
-#endif
+#define __F407ZGT6__  //__F407ZGT6__ __F407VET6__  __F103ZET6__  __F103VET6__  __F103C8T6__
 
 //************By TFTLCDCyg
-
 
 
 #define RGB(r, g, b)    ((uint32_t)((((r) & 0xffL) << 16) | (((g) & 0xffL) << 8) | ((b) & 0xffL)))
