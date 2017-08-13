@@ -8,7 +8,8 @@ void readMSGEQ7()
   delayMicroseconds(30);  
   //leftS[band] = analogRead(PC2)-35;
   //leftS[band] = analogRead(PC2)-80;   //STMCoreGeneric
-  leftS[band] = (analogRead(PC2)/3.8)-90; //STMCoreOficial
+  //leftS[band] = (analogRead(PC2)/3.8)-90; //STMCoreOficial
+  leftS[band] = (analogRead(PA3)-35); //STMCoreGeneric
   digitalWrite(strobe,HIGH); 
  }
 }
