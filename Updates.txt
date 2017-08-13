@@ -46,3 +46,16 @@ Ejemplo de uso:
 - wiring.h
 
 --> Modificación en la rutina POR para pantallas FT813 de Riverdi, estas pantallas solo requieren que el pin PD esté en alto
+
+13 08 2017
+- GD23STM32.h
+  Inclusión de:
+
+--> Del modelo específico de MCU para personalizar mensajes de error
+#define __F407ZGT6__  //__F407ZGT6__ __F407VET6__  __F103ZET6__  __F103VET6__  __F103C8T6__
+
+-->Remoción de ST_RAM, ya que esta función no funciona correctamente en placas F407.
+
+- GD23STM32.ccp
+ -->Ajuste del mensaje de error de coprocesador
+ -->Ajuste del mensaje de error relativo a la carga de assets
