@@ -43,7 +43,7 @@ void begin0() {
 
     SPI.begin();
 
-SPI.beginTransaction(SPISettings(3000000, MSBFIRST, SPI_MODE0));
+SPI.beginTransaction(SPISettings(105000000, MSBFIRST, SPI_MODE0));  //SPI1 ajuste a 10.5 MHz 
 
 #ifdef TEENSYDUINO
     SPI.beginTransaction(SPISettings(3000000, MSBFIRST, SPI_MODE0));
